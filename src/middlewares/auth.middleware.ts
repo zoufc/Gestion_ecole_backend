@@ -21,7 +21,7 @@ export class AuthMiddleware implements NestMiddleware {
   async use(req: Request, res: Response, next: NextFunction) {
     try {
       logger.info(`---MIDDLEWARE STAGE INIT---`);
-      const token = req.headers['fk-access-token'];
+      const token = req.headers['x-access-token'];
       if (!token) {
         throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
       }

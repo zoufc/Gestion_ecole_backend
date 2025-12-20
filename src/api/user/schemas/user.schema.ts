@@ -19,16 +19,22 @@ export const UserSchema = new mongoose.Schema({
   },
   email: {
     type: String,
+    required: true,
     unique: true,
   },
-  codePin: {
+  password: {
     type: String,
     required: true,
   },
   role: {
     type: String,
     enum: Role,
-    default: Role.Customer,
+    required: true,
+    default: Role.Parent,
+  },
+  school: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'School',
   },
   status: {
     type: String,
@@ -37,7 +43,7 @@ export const UserSchema = new mongoose.Schema({
   },
   active: {
     type: Boolean,
-    default: false,
+    default: true,
   },
   created_at: {
     type: Date,
@@ -51,13 +57,24 @@ export const UserSchema = new mongoose.Schema({
 
 UserSchema.pre('save', async function (next) {
   try {
-    if (!this.isModified('codePin')) {
-      return next();
+    // Hash password if modified
+    if (this.isModified('password')) {
+      const hashed = await bcrypt.hash(this['password'], 10);
+      this['password'] = hashed;
     }
-    const hashed = await bcrypt.hash(this['codePin'], 10);
-    this['codePin'] = hashed;
+
+    // Validate school requirement for Director and Teacher roles
+    if (
+      (this['role'] === Role.Director || this['role'] === Role.Teacher) &&
+      !this['school']
+    ) {
+      return next(
+        new Error('School is required for Director and Teacher roles'),
+      );
+    }
+
     return next();
   } catch (error) {
-    throw next(error);
+    return next(error);
   }
 });

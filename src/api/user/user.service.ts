@@ -45,8 +45,15 @@ export class UserService {
     }
   }
 
-  findAll() {
-    return `This action returns all user`;
+  async findAll() {
+    try {
+      return await this.userModel.find();
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
   async findOne(userId: string) {
@@ -73,6 +80,18 @@ export class UserService {
     }
   }
 
+  async findByEmail(email: string): Promise<any> {
+    try {
+      const user = await this.userModel.findOne({ email, active: true });
+      if (!user) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
+      return user;
+    } catch (error) {
+      throw new HttpException(error.message, error.status);
+    }
+  }
+
   async checkPhoneNumber(phoneNumber: string) {
     try {
       const user = await this.userModel.findOne({
@@ -88,14 +107,25 @@ export class UserService {
 
   async findLogin(createAuthDto: CreateAuthDto) {
     try {
-      const user = await this.findByPhoneNumber(createAuthDto.phoneNumber);
+      let user;
+      if (createAuthDto.phoneNumber) {
+        user = await this.findByPhoneNumber(createAuthDto.phoneNumber);
+      } else if (createAuthDto.email) {
+        user = await this.findByEmail(createAuthDto.email);
+      } else {
+        throw new HttpException(
+          'Phone number or email is required',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
       const passwordMatched = await bcrypt.compare(
         createAuthDto.password,
         user.password,
       );
       if (!passwordMatched) {
         throw new HttpException(
-          'Phone number or password incorrect',
+          'Email/Phone number or password incorrect',
           HttpStatus.NOT_FOUND,
         );
       }
@@ -105,11 +135,35 @@ export class UserService {
     }
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    try {
+      const user = await this.userModel.findByIdAndUpdate(id, updateUserDto, {
+        new: true,
+      });
+      if (!user) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
+      return user;
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: string) {
+    try {
+      const user = await this.userModel.findByIdAndDelete(id);
+      if (!user) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
+      return user;
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 }

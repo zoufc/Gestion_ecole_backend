@@ -10,6 +10,13 @@ import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './api/auth/auth.module';
 import { AuthMiddleware } from './middlewares/auth.middleware';
+import { StudentModule } from './api/student/student.module';
+import { SchoolModule } from './api/school/school.module';
+import { ClassModule } from './api/class/class.module';
+import { CourseModule } from './api/course/course.module';
+import { NoteModule } from './api/note/note.module';
+import { PaymentModule } from './api/payment/payment.module';
+import { CycleModule } from './api/cycle/cycle.module';
 
 @Module({
   imports: [
@@ -49,6 +56,13 @@ import { AuthMiddleware } from './middlewares/auth.middleware';
     AuthModule,
     UserModule,
     PhoneMessageModule,
+    StudentModule,
+    SchoolModule,
+    ClassModule,
+    CourseModule,
+    NoteModule,
+    PaymentModule,
+    CycleModule,
   ],
   controllers: [AppController],
   providers: [AppService],
@@ -63,6 +77,8 @@ export class AppModule {
         { path: 'auth/register', method: RequestMethod.POST }, // Exclure les routes d'inscription
         { path: 'auth/phoneVerification', method: RequestMethod.POST }, // Exclure les routes de vérification de code
         { path: 'thirdPartyService/create', method: RequestMethod.POST },
+        { path: 'schools', method: RequestMethod.ALL }, // Exclure toutes les routes schools
+        { path: 'users/create', method: RequestMethod.POST }, // Exclure toutes les routes users
       )
       .forRoutes('*'); // Appliquer à toutes les routes sauf exclusions
   }

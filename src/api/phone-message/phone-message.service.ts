@@ -75,19 +75,51 @@ export class PhoneMessageService {
     }
   }
 
-  findAll() {
-    return `This action returns all phoneMessage`;
+  async findAll() {
+    try {
+      return await this.phoneMessageModel.find();
+    } catch (error) {
+      throw new HttpException(error.message, error.status || HttpStatus.BAD_REQUEST);
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} phoneMessage`;
+  async findOne(id: string) {
+    try {
+      const phoneMessage = await this.phoneMessageModel.findById(id);
+      if (!phoneMessage) {
+        throw new HttpException('Phone message not found', HttpStatus.NOT_FOUND);
+      }
+      return phoneMessage;
+    } catch (error) {
+      throw new HttpException(error.message, error.status || HttpStatus.BAD_REQUEST);
+    }
   }
 
-  update(id: number, updatePhoneMessageDto: UpdatePhoneMessageDto) {
-    return `This action updates a #${id} phoneMessage`;
+  async update(id: string, updatePhoneMessageDto: UpdatePhoneMessageDto) {
+    try {
+      const phoneMessage = await this.phoneMessageModel.findByIdAndUpdate(
+        id,
+        updatePhoneMessageDto,
+        { new: true },
+      );
+      if (!phoneMessage) {
+        throw new HttpException('Phone message not found', HttpStatus.NOT_FOUND);
+      }
+      return phoneMessage;
+    } catch (error) {
+      throw new HttpException(error.message, error.status || HttpStatus.BAD_REQUEST);
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} phoneMessage`;
+  async remove(id: string) {
+    try {
+      const phoneMessage = await this.phoneMessageModel.findByIdAndDelete(id);
+      if (!phoneMessage) {
+        throw new HttpException('Phone message not found', HttpStatus.NOT_FOUND);
+      }
+      return phoneMessage;
+    } catch (error) {
+      throw new HttpException(error.message, error.status || HttpStatus.BAD_REQUEST);
+    }
   }
 }

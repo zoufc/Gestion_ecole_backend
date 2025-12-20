@@ -9,7 +9,8 @@ export interface User extends Document {
   phoneNumber: string;
   email: string;
   role: string;
-  codePin: string;
+  password: string;
+  school?: string;
   status: string;
   active: boolean;
   created_at: Date;
