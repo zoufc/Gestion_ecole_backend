@@ -9,6 +9,7 @@ import {
   Delete,
   Res,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { PhoneMessageService } from './phone-message.service';
 import { CreatePhoneMessageDto } from './dto/create-phone-message.dto';
@@ -44,12 +45,21 @@ export class PhoneMessageController {
   }
 
   @Get()
-  async findAll(@Res() res: Response) {
+  async findAll(
+    @Res() res: Response,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
     try {
       logger.info('---PHONE_MESSAGE.CONTROLLER.FIND_ALL INIT---');
-      const messages = await this.phoneMessageService.findAll();
+      const pageNumber = page ? parseInt(page, 10) : 1;
+      const limitNumber = limit ? parseInt(limit, 10) : 10;
+      const result = await this.phoneMessageService.findAll(
+        pageNumber,
+        limitNumber,
+      );
       logger.info('---PHONE_MESSAGE.CONTROLLER.FIND_ALL SUCCESS---');
-      return res.status(HttpStatus.OK).json(messages);
+      return res.status(HttpStatus.OK).json(result);
     } catch (error) {
       logger.error(
         `---PHONE_MESSAGE.CONTROLLER.FIND_ALL ERROR--- ${error.message}`,

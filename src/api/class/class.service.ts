@@ -22,11 +22,27 @@ export class ClassService {
     }
   }
 
-  async findAll() {
+  async findAll(page: number = 1, limit: number = 10) {
     try {
-      return await this.classModel
-        .find()
-        .populate(['school', 'cycle', 'teacher']);
+      const skip = (page - 1) * limit;
+      const [data, total] = await Promise.all([
+        this.classModel
+          .find()
+          .skip(skip)
+          .limit(limit)
+          .populate(['school', 'cycle', 'teacher']),
+        this.classModel.countDocuments(),
+      ]);
+
+      return {
+        data,
+        meta: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+      };
     } catch (error) {
       throw new HttpException(error.message, error.status || HttpStatus.BAD_REQUEST);
     }

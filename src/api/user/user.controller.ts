@@ -8,6 +8,7 @@ import {
   Delete,
   Res,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -35,12 +36,36 @@ export class UserController {
   }
 
   @Get()
-  async findAll(@Res() res: Response) {
+  async findAll(
+    @Res() res: Response,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('role') role?: string,
+    @Query('active') active?: string,
+    @Query('status') status?: string,
+    @Query('school') school?: string,
+    @Query('email') email?: string,
+    @Query('phoneNumber') phoneNumber?: string,
+  ) {
     try {
       logger.info(`---USER.CONTROLLER.FIND_ALL INIT---`);
-      const users = await this.userService.findAll();
+      const pageNumber = page ? parseInt(page, 10) : 1;
+      const limitNumber = limit ? parseInt(limit, 10) : 10;
+      const filters: any = {};
+      if (role) filters.role = role;
+      if (active !== undefined) filters.active = active === 'true';
+      if (status) filters.status = status;
+      if (school) filters.school = school;
+      if (email) filters.email = email;
+      if (phoneNumber) filters.phoneNumber = phoneNumber;
+
+      const result = await this.userService.findAll(
+        filters,
+        pageNumber,
+        limitNumber,
+      );
       logger.info(`---USER.CONTROLLER.FIND_ALL SUCCESS---`);
-      return res.status(HttpStatus.OK).json(users);
+      return res.status(HttpStatus.OK).json(result);
     } catch (error) {
       logger.error(`---USER.CONTROLLER.FIND_ALL ERROR ${error}---`);
       return res.status(error.status || HttpStatus.BAD_REQUEST).json(error);

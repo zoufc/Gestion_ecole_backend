@@ -25,9 +25,23 @@ export class CycleService {
     }
   }
 
-  async findAll() {
+  async findAll(page: number = 1, limit: number = 10) {
     try {
-      return await this.cycleModel.find();
+      const skip = (page - 1) * limit;
+      const [data, total] = await Promise.all([
+        this.cycleModel.find().skip(skip).limit(limit),
+        this.cycleModel.countDocuments(),
+      ]);
+
+      return {
+        data,
+        meta: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+      };
     } catch (error) {
       throw new HttpException(
         error.message,

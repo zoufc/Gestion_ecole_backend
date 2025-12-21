@@ -17,6 +17,7 @@ import { CourseModule } from './api/course/course.module';
 import { NoteModule } from './api/note/note.module';
 import { PaymentModule } from './api/payment/payment.module';
 import { CycleModule } from './api/cycle/cycle.module';
+import { BadgeModule } from './api/badge/badge.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { CycleModule } from './api/cycle/cycle.module';
     NoteModule,
     PaymentModule,
     CycleModule,
+    BadgeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

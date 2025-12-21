@@ -22,9 +22,23 @@ export class CourseService {
     }
   }
 
-  async findAll() {
+  async findAll(page: number = 1, limit: number = 10) {
     try {
-      return await this.courseModel.find().populate(['class']);
+      const skip = (page - 1) * limit;
+      const [data, total] = await Promise.all([
+        this.courseModel.find().skip(skip).limit(limit).populate(['class']),
+        this.courseModel.countDocuments(),
+      ]);
+
+      return {
+        data,
+        meta: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+      };
     } catch (error) {
       throw new HttpException(error.message, error.status || HttpStatus.BAD_REQUEST);
     }

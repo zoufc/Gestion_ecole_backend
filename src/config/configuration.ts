@@ -10,4 +10,7 @@ export default () => ({
       : process.env.DEV_DB_URL,
   privateKey: process.env.PRIVATE_KEY,
   publicKey: process.env.PUBLIC_KEY,
+  promobileSmsUrl: process.env.PROMOBILE_SMS_URL,
+  promobileSmsAccessKey: process.env.PROMOBILE_SMS_ACCESS_KEY,
+  promobileSmsFrom: process.env.PROMOBILE_SMS_FROM || 'ECOLE DIOBASS',
 });

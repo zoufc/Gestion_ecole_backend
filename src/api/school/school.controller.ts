@@ -8,6 +8,7 @@ import {
   Delete,
   Res,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { SchoolService } from './school.service';
 import { CreateSchoolDto } from './dto/create-school.dto';
@@ -38,12 +39,18 @@ export class SchoolController {
   }
 
   @Get()
-  async findAll(@Res() res: Response) {
+  async findAll(
+    @Res() res: Response,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
     try {
       logger.info('---SCHOOL.CONTROLLER.FIND_ALL INIT---');
-      const schools = await this.schoolService.findAll();
+      const pageNumber = page ? parseInt(page, 10) : 1;
+      const limitNumber = limit ? parseInt(limit, 10) : 10;
+      const result = await this.schoolService.findAll(pageNumber, limitNumber);
       logger.info('---SCHOOL.CONTROLLER.FIND_ALL SUCCESS---');
-      return res.status(HttpStatus.OK).json(schools);
+      return res.status(HttpStatus.OK).json(result);
     } catch (error) {
       logger.error(`---SCHOOL.CONTROLLER.FIND_ALL ERROR--- ${error.message}`);
       return res

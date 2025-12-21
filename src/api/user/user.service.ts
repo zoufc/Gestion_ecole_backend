@@ -45,9 +45,34 @@ export class UserService {
     }
   }
 
-  async findAll() {
+  async findAll(filters?: any, page: number = 1, limit: number = 10) {
     try {
-      return await this.userModel.find();
+      const filterQuery: any = {};
+      
+      if (filters) {
+        if (filters.role) filterQuery.role = filters.role;
+        if (filters.active !== undefined) filterQuery.active = filters.active;
+        if (filters.status) filterQuery.status = filters.status;
+        if (filters.school) filterQuery.school = filters.school;
+        if (filters.email) filterQuery.email = filters.email;
+        if (filters.phoneNumber) filterQuery.phoneNumber = filters.phoneNumber;
+      }
+
+      const skip = (page - 1) * limit;
+      const [data, total] = await Promise.all([
+        this.userModel.find(filterQuery).skip(skip).limit(limit).exec(),
+        this.userModel.countDocuments(filterQuery),
+      ]);
+
+      return {
+        data,
+        meta: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+      };
     } catch (error) {
       throw new HttpException(
         error.message,

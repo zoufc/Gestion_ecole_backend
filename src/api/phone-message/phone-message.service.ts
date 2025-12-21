@@ -75,9 +75,23 @@ export class PhoneMessageService {
     }
   }
 
-  async findAll() {
+  async findAll(page: number = 1, limit: number = 10) {
     try {
-      return await this.phoneMessageModel.find();
+      const skip = (page - 1) * limit;
+      const [data, total] = await Promise.all([
+        this.phoneMessageModel.find().skip(skip).limit(limit),
+        this.phoneMessageModel.countDocuments(),
+      ]);
+
+      return {
+        data,
+        meta: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+      };
     } catch (error) {
       throw new HttpException(error.message, error.status || HttpStatus.BAD_REQUEST);
     }

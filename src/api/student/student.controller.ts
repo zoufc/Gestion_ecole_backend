@@ -8,6 +8,7 @@ import {
   Delete,
   Res,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { StudentService } from './student.service';
 import { CreateStudentDto } from './dto/create-student.dto';
@@ -31,24 +32,26 @@ export class StudentController {
       return res.status(HttpStatus.CREATED).json(student);
     } catch (error) {
       logger.error(`---STUDENT.CONTROLLER.CREATE ERROR--- ${error.message}`);
-      return res
-        .status(error.status || HttpStatus.BAD_REQUEST)
-        .json(error);
+      return res.status(error.status || HttpStatus.BAD_REQUEST).json(error);
     }
   }
 
   @Get()
-  async findAll(@Res() res: Response) {
+  async findAll(
+    @Res() res: Response,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
     try {
       logger.info('---STUDENT.CONTROLLER.FIND_ALL INIT---');
-      const students = await this.studentService.findAll();
+      const pageNumber = page ? parseInt(page, 10) : 1;
+      const limitNumber = limit ? parseInt(limit, 10) : 10;
+      const result = await this.studentService.findAll(pageNumber, limitNumber);
       logger.info('---STUDENT.CONTROLLER.FIND_ALL SUCCESS---');
-      return res.status(HttpStatus.OK).json(students);
+      return res.status(HttpStatus.OK).json(result);
     } catch (error) {
       logger.error(`---STUDENT.CONTROLLER.FIND_ALL ERROR--- ${error.message}`);
-      return res
-        .status(error.status || HttpStatus.BAD_REQUEST)
-        .json(error);
+      return res.status(error.status || HttpStatus.BAD_REQUEST).json(error);
     }
   }
 
@@ -61,9 +64,7 @@ export class StudentController {
       return res.status(HttpStatus.OK).json(student);
     } catch (error) {
       logger.error(`---STUDENT.CONTROLLER.FIND_ONE ERROR--- ${error.message}`);
-      return res
-        .status(error.status || HttpStatus.BAD_REQUEST)
-        .json(error);
+      return res.status(error.status || HttpStatus.BAD_REQUEST).json(error);
     }
   }
 
@@ -80,9 +81,7 @@ export class StudentController {
       return res.status(HttpStatus.OK).json(student);
     } catch (error) {
       logger.error(`---STUDENT.CONTROLLER.UPDATE ERROR--- ${error.message}`);
-      return res
-        .status(error.status || HttpStatus.BAD_REQUEST)
-        .json(error);
+      return res.status(error.status || HttpStatus.BAD_REQUEST).json(error);
     }
   }
 
@@ -95,9 +94,7 @@ export class StudentController {
       return res.status(HttpStatus.OK).json(student);
     } catch (error) {
       logger.error(`---STUDENT.CONTROLLER.REMOVE ERROR--- ${error.message}`);
-      return res
-        .status(error.status || HttpStatus.BAD_REQUEST)
-        .json(error);
+      return res.status(error.status || HttpStatus.BAD_REQUEST).json(error);
     }
   }
 }

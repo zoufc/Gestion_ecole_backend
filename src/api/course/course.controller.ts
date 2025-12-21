@@ -8,6 +8,7 @@ import {
   Delete,
   Res,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
@@ -33,12 +34,18 @@ export class CourseController {
   }
 
   @Get()
-  async findAll(@Res() res: Response) {
+  async findAll(
+    @Res() res: Response,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
     try {
       logger.info('---COURSE.CONTROLLER.FIND_ALL INIT---');
-      const courses = await this.courseService.findAll();
+      const pageNumber = page ? parseInt(page, 10) : 1;
+      const limitNumber = limit ? parseInt(limit, 10) : 10;
+      const result = await this.courseService.findAll(pageNumber, limitNumber);
       logger.info('---COURSE.CONTROLLER.FIND_ALL SUCCESS---');
-      return res.status(HttpStatus.OK).json(courses);
+      return res.status(HttpStatus.OK).json(result);
     } catch (error) {
       logger.error(`---COURSE.CONTROLLER.FIND_ALL ERROR--- ${error.message}`);
       return res.status(error.status || HttpStatus.BAD_REQUEST).json(error);

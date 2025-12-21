@@ -24,9 +24,23 @@ export class SchoolService {
     }
   }
 
-  async findAll() {
+  async findAll(page: number = 1, limit: number = 10) {
     try {
-      return await this.schoolModel.find();
+      const skip = (page - 1) * limit;
+      const [data, total] = await Promise.all([
+        this.schoolModel.find().skip(skip).limit(limit),
+        this.schoolModel.countDocuments(),
+      ]);
+
+      return {
+        data,
+        meta: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+      };
     } catch (error) {
       throw new HttpException(
         error.message,
