@@ -6,6 +6,7 @@ import {
   IsEnum,
   IsString,
   IsOptional,
+  Max,
 } from 'class-validator';
 import { PaymentMethod } from '../../../utils/enums/payment_method.enum';
 import { PaymentStatus } from '../../../utils/enums/payment_status.enum';
@@ -19,14 +20,19 @@ export class CreatePaymentDto {
   @IsString()
   month: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
-  @Min(0, { message: 'Amount must be positive' })
-  amount: number;
+  @Min(0, { message: 'Reduction percentage must be at least 0' })
+  @Max(100, { message: 'Reduction percentage must be at most 100' })
+  reductionPercentage?: number;
 
   @IsNotEmpty()
   @IsEnum(PaymentMethod)
   method: PaymentMethod;
+
+  @IsNotEmpty()
+  @IsMongoId({ message: 'PaymentType must be a valid MongoDB ObjectId' })
+  paymentType: string;
 
   @IsOptional()
   @IsEnum(PaymentStatus)

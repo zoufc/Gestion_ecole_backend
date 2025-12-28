@@ -25,15 +25,9 @@ export const StudentSchema = new mongoose.Schema({
     ref: 'Class',
     required: true,
   },
-  parentFullName: {
-    type: String,
-    required: true,
-  },
-  parentEmail: {
-    type: String,
-  },
-  parentPhoneNumber: {
-    type: String,
+  parent: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'Parent',
     required: true,
   },
   code: {

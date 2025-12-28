@@ -19,8 +19,8 @@ export const UserSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: true,
     unique: true,
+    sparse: true, // Allow multiple null values (email is optional)
   },
   password: {
     type: String,

@@ -4,6 +4,7 @@ import { UpdateStudentDto } from './dto/update-student.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Student } from './interfaces/student.interface';
+import { Parent } from '../parent/interfaces/parent.interface';
 import logger from 'src/utils/logger';
 import { generateAlphanumericCode } from 'src/utils/functions/code_generation';
 import { BadgeService } from '../badge/badge.service';
@@ -14,6 +15,7 @@ import { ConfigService } from '@nestjs/config';
 export class StudentService {
   constructor(
     @InjectModel('Student') private studentModel: Model<Student>,
+    @InjectModel('Parent') private parentModel: Model<Parent>,
     private badgeService: BadgeService,
     private promobileSmsService: PromobileSmsService,
     private configService: ConfigService,
@@ -21,10 +23,21 @@ export class StudentService {
   async create(createStudentDto: CreateStudentDto) {
     try {
       logger.info('---STUDENT.SERVICE.CREATE INIT---');
+
+      // Create parent first
+      const parentData = {
+        firstName: createStudentDto.parentFirstName,
+        lastName: createStudentDto.parentLastName,
+        email: createStudentDto.parentEmail,
+        phoneNumber: createStudentDto.parentPhoneNumber,
+        platformAccess: false,
+      };
+      const parent = await this.parentModel.create(parentData);
+      logger.info('---STUDENT.SERVICE.PARENT_CREATED---');
+
+      // Generate unique code for student
       let uniqueCode = false;
       let code: string;
-
-      // Generate unique code
       while (!uniqueCode) {
         code = generateAlphanumericCode(8);
         const existingStudent = await this.studentModel.findOne({ code });
@@ -33,8 +46,17 @@ export class StudentService {
         }
       }
 
+      // Create student with parent reference
+      const {
+        parentFirstName,
+        parentLastName,
+        parentEmail,
+        parentPhoneNumber,
+        ...studentData
+      } = createStudentDto;
       const student = await this.studentModel.create({
-        ...createStudentDto,
+        ...studentData,
+        parent: parent._id,
         code,
       });
 
@@ -56,6 +78,7 @@ export class StudentService {
       try {
         const studentWithDetails = await this.studentModel
           .findById(student._id)
+          .populate('parent')
           .populate({
             path: 'class',
             populate: {
@@ -63,13 +86,14 @@ export class StudentService {
             },
           });
 
-        if (studentWithDetails) {
+        if (studentWithDetails && studentWithDetails.parent) {
+          const parentData = studentWithDetails.parent as any;
           const smsContent = this.buildSmsContent(studentWithDetails);
           const smsFrom = this.configService.get<string>('promobileSmsFrom');
 
           const smsResponse = await this.promobileSmsService.sendSms({
             from: smsFrom,
-            to: studentWithDetails.parentPhoneNumber,
+            to: parentData.phoneNumber,
             content: smsContent,
           });
           logger.info(
@@ -98,7 +122,17 @@ export class StudentService {
     try {
       const skip = (page - 1) * limit;
       const [data, total] = await Promise.all([
-        this.studentModel.find().skip(skip).limit(limit).populate(['class']),
+        this.studentModel
+          .find()
+          .skip(skip)
+          .limit(limit)
+          .populate('parent')
+          .populate({
+            path: 'class',
+            populate: {
+              path: 'school',
+            },
+          }),
         this.studentModel.countDocuments(),
       ]);
 
@@ -121,12 +155,15 @@ export class StudentService {
 
   async findOne(id: string) {
     try {
-      const student = await this.studentModel.findById(id).populate({
-        path: 'class',
-        populate: {
-          path: 'school',
-        },
-      });
+      const student = await this.studentModel
+        .findById(id)
+        .populate('parent')
+        .populate({
+          path: 'class',
+          populate: {
+            path: 'school',
+          },
+        });
       if (!student) {
         throw new HttpException('Student not found', HttpStatus.NOT_FOUND);
       }
@@ -178,7 +215,10 @@ export class StudentService {
     const studentCode = student.code;
     const className = student.class?.name || 'N/A';
     const schoolName = student.class?.school?.name || 'N/A';
+    const parentFullName = student.parent
+      ? `${student.parent.firstName} ${student.parent.lastName}`
+      : 'Parent';
 
-    return `Bonjour ${student.parentFullName},\n\nVotre enfant ${studentName} a été inscrit(e) avec succès à l'école.\n\nDétails de l'inscription:\n- Code étudiant: ${studentCode}\n- Classe: ${className}\n- École: ${schoolName}\n\nMerci de votre confiance.`;
+    return `Bonjour ${parentFullName},\n\nVotre enfant ${studentName} a été inscrit(e) avec succès à l'école.\n\nDétails de l'inscription:\n- Code étudiant: ${studentCode}\n- Classe: ${className}\n- École: ${schoolName}\n\nMerci de votre confiance.`;
   }
 }

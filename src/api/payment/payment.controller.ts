@@ -32,9 +32,7 @@ export class PaymentController {
       return res.status(HttpStatus.CREATED).json(payment);
     } catch (error) {
       logger.error(`---PAYMENT.CONTROLLER.CREATE ERROR--- ${error.message}`);
-      return res
-        .status(error.status || HttpStatus.BAD_REQUEST)
-        .json(error);
+      return res.status(error.status || HttpStatus.BAD_REQUEST).json(error);
     }
   }
 
@@ -43,19 +41,37 @@ export class PaymentController {
     @Res() res: Response,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
+    @Query('paymentType') paymentType?: string,
+    @Query('status') status?: string,
+    @Query('method') method?: string,
+    @Query('student') student?: string,
+    @Query('month') month?: string,
+    @Query('reference') reference?: string,
+    @Query('search') search?: string,
   ) {
     try {
       logger.info('---PAYMENT.CONTROLLER.FIND_ALL INIT---');
       const pageNumber = page ? parseInt(page, 10) : 1;
       const limitNumber = limit ? parseInt(limit, 10) : 10;
-      const result = await this.paymentService.findAll(pageNumber, limitNumber);
+      const filters: any = {};
+      if (paymentType) filters.paymentType = paymentType;
+      if (status) filters.status = status;
+      if (method) filters.method = method;
+      if (student) filters.student = student;
+      if (month) filters.month = month;
+      if (reference) filters.reference = reference;
+      if (search) filters.search = search;
+
+      const result = await this.paymentService.findAll(
+        filters,
+        pageNumber,
+        limitNumber,
+      );
       logger.info('---PAYMENT.CONTROLLER.FIND_ALL SUCCESS---');
       return res.status(HttpStatus.OK).json(result);
     } catch (error) {
       logger.error(`---PAYMENT.CONTROLLER.FIND_ALL ERROR--- ${error.message}`);
-      return res
-        .status(error.status || HttpStatus.BAD_REQUEST)
-        .json(error);
+      return res.status(error.status || HttpStatus.BAD_REQUEST).json(error);
     }
   }
 
@@ -68,9 +84,7 @@ export class PaymentController {
       return res.status(HttpStatus.OK).json(payment);
     } catch (error) {
       logger.error(`---PAYMENT.CONTROLLER.FIND_ONE ERROR--- ${error.message}`);
-      return res
-        .status(error.status || HttpStatus.BAD_REQUEST)
-        .json(error);
+      return res.status(error.status || HttpStatus.BAD_REQUEST).json(error);
     }
   }
 
@@ -87,9 +101,7 @@ export class PaymentController {
       return res.status(HttpStatus.OK).json(payment);
     } catch (error) {
       logger.error(`---PAYMENT.CONTROLLER.UPDATE ERROR--- ${error.message}`);
-      return res
-        .status(error.status || HttpStatus.BAD_REQUEST)
-        .json(error);
+      return res.status(error.status || HttpStatus.BAD_REQUEST).json(error);
     }
   }
 
@@ -102,9 +114,7 @@ export class PaymentController {
       return res.status(HttpStatus.OK).json(payment);
     } catch (error) {
       logger.error(`---PAYMENT.CONTROLLER.REMOVE ERROR--- ${error.message}`);
-      return res
-        .status(error.status || HttpStatus.BAD_REQUEST)
-        .json(error);
+      return res.status(error.status || HttpStatus.BAD_REQUEST).json(error);
     }
   }
 }

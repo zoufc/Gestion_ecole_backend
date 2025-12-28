@@ -9,10 +9,10 @@ export class CreateUserDto {
   lastname: string;
   @IsNotEmpty()
   phoneNumber: string;
-  @IsNotEmpty()
-  email: string;
   @IsOptional()
-  password: string;
+  email?: string;
+  @IsOptional()
+  password?: string;
   @IsOptional()
   role?: string;
   @ValidateIf((o) => o.role === Role.Director || o.role === Role.Teacher)

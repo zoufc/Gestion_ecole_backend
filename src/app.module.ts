@@ -18,6 +18,8 @@ import { NoteModule } from './api/note/note.module';
 import { PaymentModule } from './api/payment/payment.module';
 import { CycleModule } from './api/cycle/cycle.module';
 import { BadgeModule } from './api/badge/badge.module';
+import { PaymentTypeModule } from './api/payment-type/payment-type.module';
+import { ParentModule } from './api/parent/parent.module';
 
 @Module({
   imports: [
@@ -65,6 +67,8 @@ import { BadgeModule } from './api/badge/badge.module';
     PaymentModule,
     CycleModule,
     BadgeModule,
+    PaymentTypeModule,
+    ParentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

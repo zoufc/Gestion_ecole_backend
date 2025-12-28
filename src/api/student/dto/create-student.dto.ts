@@ -27,7 +27,10 @@ export class CreateStudentDto {
   class: string;
 
   @IsNotEmpty()
-  parentFullName: string;
+  parentFirstName: string;
+
+  @IsNotEmpty()
+  parentLastName: string;
 
   @IsOptional()
   parentEmail?: string;

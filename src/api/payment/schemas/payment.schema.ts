@@ -12,10 +12,15 @@ export const PaymentSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  amount: {
+  reductionPercentage: {
     type: Number,
     required: true,
     min: 0,
+    max: 100,
+  },
+  totalAmount: {
+    type: Number,
+    required: true,
   },
   paymentDate: {
     type: Date,
@@ -30,14 +35,17 @@ export const PaymentSchema = new mongoose.Schema({
   reference: {
     type: String,
     unique: true,
-    required: true,
-    uppercase: true,
   },
   status: {
     type: String,
     enum: PaymentStatus,
     required: true,
     default: PaymentStatus.PENDING,
+  },
+  paymentType: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'PaymentType',
+    required: true,
   },
   created_at: {
     type: Date,

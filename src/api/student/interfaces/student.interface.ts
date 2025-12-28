@@ -6,9 +6,7 @@ export interface Student extends Document {
   birthDate: Date;
   gender: string;
   class: string;
-  parentFullName: string;
-  parentEmail?: string;
-  parentPhoneNumber: string;
+  parent: string;
   code: string;
   created_at: Date;
   updated_at: Date;
